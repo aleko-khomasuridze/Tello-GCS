@@ -1,20 +1,13 @@
 const videoEl = document.getElementById("video");
 
-const connPill = document.getElementById("connPill");
-const fpsPill = document.getElementById("fpsPill");
+const connPill = document.getElementById("connBadge");
+const fpsPill = document.getElementById("fpsBadge");
 
 const btnConnect = document.getElementById("btnConnect");
 const btnDisconnect = document.getElementById("btnDisconnect");
 const btnTakeoff = document.getElementById("btnTakeoff");
 const btnLand = document.getElementById("btnLand");
 const btnEmergency = document.getElementById("btnEmergency");
-
-const rcRoll = document.getElementById("rcRoll");
-const rcPitch = document.getElementById("rcPitch");
-const rcThrottle = document.getElementById("rcThrottle");
-const rcYaw = document.getElementById("rcYaw");
-const btnSendRC = document.getElementById("btnSendRC");
-const btnCenterRC = document.getElementById("btnCenterRC");
 
 const tBattery = document.getElementById("tBattery");
 const tHeight = document.getElementById("tHeight");
@@ -32,8 +25,8 @@ let fpsSmooth = 0;
 
 function setConnected(isConn){
   connPill.textContent = isConn ? "CONNECTED" : "DISCONNECTED";
-  connPill.classList.toggle("ok", isConn);
-  connPill.classList.toggle("bad", !isConn);
+  connPill.classList.toggle("text-bg-success", isConn);
+  connPill.classList.toggle("text-bg-danger", !isConn);
 }
 
 btnConnect.onclick = async () => {
@@ -61,19 +54,7 @@ btnEmergency.onclick = async () => {
   if(!res.ok) alert(res.error || "Emergency failed");
 };
 
-btnSendRC.onclick = async () => {
-  await sendRC();
-};
-
-btnCenterRC.onclick = () => {
-  rcRoll.value = 0; rcPitch.value = 0; rcThrottle.value = 0; rcYaw.value = 0;
-};
-
-async function sendRC(){
-  const lr = parseInt(rcRoll.value, 10);
-  const fb = parseInt(rcPitch.value, 10);
-  const ud = parseInt(rcThrottle.value, 10);
-  const yw = parseInt(rcYaw.value, 10);
+async function sendRC(lr = 0, fb = 0, ud = 0, yw = 0){
   await eel.ui_rc(lr, fb, ud, yw)();
 }
 
@@ -104,15 +85,15 @@ function tickKeys(){
   if(keys.has("ArrowUp"))    ud += STEP;
   if(keys.has("ArrowDown"))  ud -= STEP;
 
-  // Update sliders (visual feedback)
-  rcRoll.value = clamp(lr);
-  rcPitch.value = clamp(fb);
-  rcThrottle.value = clamp(ud);
-  rcYaw.value = clamp(yw);
+  // Clamp values before sending
+  lr = clamp(lr);
+  fb = clamp(fb);
+  ud = clamp(ud);
+  yw = clamp(yw);
 
   // Send continuously while keys are held
   if(keys.size > 0){
-    sendRC();
+    sendRC(lr, fb, ud, yw);
   }
 
   requestAnimationFrame(tickKeys);
@@ -128,7 +109,6 @@ window.addEventListener("keyup", (e) => {
   keys.delete(e.key.toLowerCase());
   // When released, center controls and send neutral
   if(keys.size === 0){
-    rcRoll.value = 0; rcPitch.value = 0; rcThrottle.value = 0; rcYaw.value = 0;
     sendRC();
   }
 });
