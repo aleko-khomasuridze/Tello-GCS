@@ -39,7 +39,6 @@ def video_loop(state: GCSState, drone: DroneController, push_frame_cb):
         return
 
 
-    container = av.open(stream)
     last_frame_time = 0.0
 
     try:
@@ -68,3 +67,11 @@ def video_loop(state: GCSState, drone: DroneController, push_frame_cb):
         print("Decoder restart...")
     except Exception as e:
         print("Video loop error:", e)
+
+
+    finally:
+        try:
+            if container is not None:
+                container.close()
+        except Exception:
+            pass

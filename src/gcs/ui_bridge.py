@@ -59,6 +59,15 @@ def register_eel_api(ui: UIBridge):
         ui.drone.disconnect()
         return {"ok": True}
 
+
+    @eel.expose
+    def ui_rc(lr, fb, ud, yw):
+        try:
+            ui.drone.rc(int(lr), int(fb), int(ud), int(yw))
+            return {"ok": True}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
     @eel.expose
     def ui_takeoff():
         try:
